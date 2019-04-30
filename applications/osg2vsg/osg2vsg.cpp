@@ -213,6 +213,7 @@ int main(int argc, char** argv)
     auto pathFilename = arguments.value(std::string(),"-p");
     auto batchLeafData = arguments.read("--batch");
     auto simulationFrameRate = arguments.value(0.0, "--sim-fps");
+    auto newTraversal = arguments.read("--nt");
     arguments.read({"--support-mask", "--sm"}, sceneBuilder.supportedShaderModeMask);
     arguments.read({"--override-mask", "--om"}, sceneBuilder.overrideShaderModeMask);
     arguments.read({ "--vertex-shader", "--vert" }, sceneBuilder.vertexShaderPath);
@@ -399,7 +400,7 @@ int main(int argc, char** argv)
 
 
     // add a GraphicsStage tp the Window to do dispatch of the command graph to the commnad buffer(s)
-    window->addStage(vsg::GraphicsStage::create(vsg_scene, camera));
+    window->addStage(vsg::GraphicsStage::create(vsg_scene, camera, newTraversal));
 
     auto before_compile = std::chrono::steady_clock::now();
 
