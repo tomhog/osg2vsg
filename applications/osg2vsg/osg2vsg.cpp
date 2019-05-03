@@ -163,6 +163,34 @@ namespace osg2vsg
             }
         }
 
+        void apply(vsg::VertexIndexDraw& vid) override
+        {
+            for(auto& data : vid._arrays)
+            {
+                objects->addChild(data);
+            }
+            if (vid._indices)
+            {
+                objects->addChild(vid._indices);
+            }
+        }
+
+        void apply(vsg::BindVertexBuffers& bvb) override
+        {
+            for(auto& data : bvb.getArrays())
+            {
+                objects->addChild(data);
+            }
+        }
+
+        void apply(vsg::BindIndexBuffer& bib) override
+        {
+            if (bib.getIndices())
+            {
+                objects->addChild(vsg::ref_ptr<vsg::Data>(bib.getIndices()));
+            }
+        }
+
         void apply(vsg::StateGroup& stategroup) override
         {
             for(auto& command : stategroup.getStateCommands())
@@ -193,17 +221,21 @@ int main(int argc, char** argv)
     vsg::CommandLine arguments(&argc, argv);
     windowTraits->debugLayer = arguments.read({"--debug","-d"});
     windowTraits->apiDumpLayer = arguments.read({"--api","-a"});
-    if (arguments.read({"--no-frame", "--nf"})) windowTraits->decoration = false;
     if (arguments.read("--IMMEDIATE")) windowTraits->swapchainPreferences.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
     if (arguments.read("--FIFO")) windowTraits->swapchainPreferences.presentMode = VK_PRESENT_MODE_FIFO_KHR;
     if (arguments.read("--FIFO_RELAXED")) windowTraits->swapchainPreferences.presentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
     if (arguments.read("--MAILBOX")) windowTraits->swapchainPreferences.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-    if (arguments.read({"--fullscreen", "--fs"})) windowTraits->fullscreen = true;
     if (arguments.read({"-t", "--test"})) { windowTraits->swapchainPreferences.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR; windowTraits->fullscreen = true; }
+    if (arguments.read({"--st", "--small-test"})) { windowTraits->swapchainPreferences.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR; windowTraits->width = 192, windowTraits->height = 108; windowTraits->decoration = false; }
+    if (arguments.read({"--fullscreen", "--fs"})) windowTraits->fullscreen = true;
     if (arguments.read({"--window", "-w"}, windowTraits->width, windowTraits->height)) { windowTraits->fullscreen = false; }
-    if (arguments.read("--no-culling")) sceneBuilder.insertCullGroups = false;
+    if (arguments.read({"--no-frame", "--nf"})) windowTraits->decoration = false;
     if (arguments.read("--cull-nodes")) sceneBuilder.insertCullNodes = true;
     if (arguments.read("--no-cull-nodes")) sceneBuilder.insertCullNodes = false;
+    if (arguments.read("--no-culling")) { sceneBuilder.insertCullGroups = false; sceneBuilder.insertCullNodes = false; }
+    if (arguments.read("--Geometry")) { sceneBuilder.geometryTarget = osg2vsg::VSG_GEOMETRY; }
+    if (arguments.read("--VertexIndexDraw")) { sceneBuilder.geometryTarget = osg2vsg::VSG_VERTEXINDEXDRAW; }
+    if (arguments.read("--Commands")) { sceneBuilder.geometryTarget = osg2vsg::VSG_COMMANDS; }
     if (arguments.read({"--bind-single-ds", "--bsds"})) sceneBuilder.useBindDescriptorSet = true;
     auto numFrames = arguments.value(-1, "-f");
     auto writeToFileProgramAndDataSetSets = arguments.read({"--write-stateset", "--ws"});
