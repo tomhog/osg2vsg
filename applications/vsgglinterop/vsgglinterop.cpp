@@ -533,6 +533,8 @@ int main(int argc, char** argv)
     VkImageUsageFlags colorUsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT;
     VkImageLayout colorLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
+    auto imageFilename = arguments.value(std::string("Images/osg256.png"),"-i");
+
     osg::ref_ptr<osg::Image> osgimage = nullptr;
 
     bool rttDemo = arguments.read("--osgrtt");
@@ -544,10 +546,10 @@ int main(int argc, char** argv)
     else
     {
         // non rtt load and osg image to use in our shared texture
-        osgimage = osgDB::readImageFile(vsg::findFile("textures/osglogo.png", searchPaths));
+        osgimage = osgDB::readImageFile(imageFilename);
         if (!osgimage)
         {
-            OSG_FATAL << "Failed to load texture extures/osglogo.png, exiting" << std::endl;
+            OSG_FATAL << "Failed to load texture "<<imageFilename<<", exiting" << std::endl;
             return 0;
         }
 
